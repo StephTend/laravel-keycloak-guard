@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use KeycloakGuard\Exceptions\ResourceAccessNotAllowedException;
 use KeycloakGuard\Exceptions\TokenException;
 use KeycloakGuard\Exceptions\UserNotFoundException;
+use Exception;
 
 class KeycloakGuard implements Guard
 {
@@ -130,8 +131,12 @@ class KeycloakGuard implements Guard
    */
   private function validateResources()
   {
+    try {
     $token_role_property = $this->config['token_role_property'];
     $bpRoles = (array)$this->decodedToken->{$token_role_property};
+    } catch (Exception $e) {
+        throw new ResourceAccessNotAllowedException("No " . $this->config['token_role_property'] . " found or other Error");
+    }
 
     // Extract roles from first BP
     $this->roles = array_shift($bpRoles);
